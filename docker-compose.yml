@@ -1,0 +1,33 @@
+version: '3'
+volumes: 
+  datafiles:
+    
+services:
+  database:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - datafiles:/var/lib/mysql
+      - "./setup.sql:/docker-entrypoint-initdb.d/1.sql"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: auser
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: CustomerDB
+      
+  customer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on: 
+      - database
+    ports:
+      - "5000:5000"
+    restart: always
+    environment:
+      - DbUser=auser
+      - DbPassword=password
+      - DbHost=database
+      - DbName=CustomerDB
